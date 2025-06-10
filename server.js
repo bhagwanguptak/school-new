@@ -3,7 +3,6 @@
 const dotenv = require('dotenv');
 const path = require('path'); // You'll likely need 'path' for joining directory paths
 
-// Load variables from 'variables.env' in the current directory
 const envConfig = dotenv.config({ path: path.resolve(__dirname, 'variables.env') });
 
 if (envConfig.error) {
@@ -27,7 +26,7 @@ const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer'); 
 const cookie = require('express-session/session/cookie');
 
-const saltRounds = 10; // Cost factor for bcrypt hashing
+const saltRounds = 10; 
 
 const app = express();
 let mailTransporter;
@@ -40,10 +39,7 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    // Optional: if using self-signed certificates for local dev (not recommended for prod)
-    // tls: {
-    //   rejectUnauthorized: false
-    // }
+
   });
 
   mailTransporter.verify(function(error, success) {
@@ -61,8 +57,8 @@ if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
 
 // --- Middlewares ---
 app.use(cors()); // Allow all origins
-app.use(bodyParser.json({ limit: '15mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' })); // extended: true is generally better
+app.use(bodyParser.json({ limit: '20mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '20mb' })); // extended: true is generally better
 
 // Serve static files from 'public' directory (HTML, CSS, client-side JS)
 app.use(express.static(path.join(__dirname, 'public')));
