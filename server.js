@@ -61,7 +61,6 @@ app.use(bodyParser.json({ limit: '20mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '20mb' })); // extended: true is generally better
 
 // Serve static files from 'public' directory (HTML, CSS, client-side JS)
-app.use(express.static(path.join(__dirname, 'public')));
 // Serve uploaded files statically from 'public/uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
@@ -69,7 +68,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use(session({
   store: new SQLiteStore({
     db: 'sessions.db', // Can be same as your school.db or a new file
-    dir: '.',          // Directory to store the database file (project root)
+    dir: './',          // Directory to store the database file (project root)
     table: 'sessions'  // Table name for sessions
   }),
   secret: process.env.SESSION_SECRET || 'please_change_this_super_secret_key_for_production', // Use environment variable or a strong random string
@@ -164,8 +163,11 @@ function checkAuth(req, res, next) {
 // --- HTML Serving Routes ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'school.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
-app.get(['/admin','/admin.html'], checkAuth, (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/admin', checkAuth, (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/admin.html', checkAuth, (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/school', (req, res) => res.sendFile(path.join(__dirname, 'public', 'school.html')));
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 // --- Authentication API Routes ---
@@ -505,10 +507,10 @@ app.delete('/api/carousel/:id', checkAuth, (req, res) => {
 // ----whatsapp messaging---
 // ---- CONTACT FORM SUBMISSION API ----
 app.post('/api/submit-contact', async (req, res) => {
-  const { contactName, contactEmail, contactSubject, contactMessage } = req.body;
+  const { contactName, contactEmail, phoneNumber, contactSubject, contactMessage } = req.body;
 
   // Basic validation
-  if (!contactName || !contactEmail || !contactSubject || !contactMessage) {
+  if (!contactName || !contactSubject || !contactMessage || !phoneNumber) {
     return res.status(400).json({
       success: false,
       message: "All fields are required. Please fill out the form completely."
@@ -563,6 +565,7 @@ app.post('/api/submit-contact', async (req, res) => {
 -----------------------------
 *Name:* ${contactName}
 *Email:* ${contactEmail}
+*Phone Number*: ${phoneNumber}
 *Subject:* ${contactSubject}
 -----------------------------
 *Message:*
@@ -606,11 +609,12 @@ Sent from the school website.`;
       replyTo: contactEmail, // Set Reply-To to the user's email
       to: schoolContactEmailSetting, // List of receivers (school's email)
       subject: `New Contact Form: ${contactSubject}`, // Subject line
-      text: `You have a new contact form submission:\n\nName: ${contactName}\nEmail: ${contactEmail}\nSubject: ${contactSubject}\n\nMessage:\n${contactMessage}`, // Plain text body
-      html: `<p>You have a new contact form submission:</p>
+      text: `You have a new contact form submission:\n\nName: ${contactName}\nEmail: ${contactEmail}\Phone Number: ${phoneNumber}\nSubject: ${contactSubject}\n\nMessage:\n${contactMessage}`, // Plain text body
+      html: `<p><strong>You have a new contact form submission:</strong></p>
              <ul>
                <li><strong>Name:</strong> ${contactName}</li>
                <li><strong>Email:</strong> ${contactEmail}</li>
+               <li><strong>Phone Number:</strong> ${phoneNumber}</li>
                <li><strong>Subject:</strong> ${contactSubject}</li>
              </ul>
              <p><strong>Message:</strong></p>

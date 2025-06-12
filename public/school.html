@@ -173,13 +173,18 @@
           <form id="mainContactForm" class="row g-3 needs-validation contact-form shadow-lg p-4 p-md-5 rounded h-100" novalidate>
             <div class="col-md-6">
               <label for="contactName" class="form-label">Your Name</label>
-              <input type="text" class="form-control" id="contactName" name="contactName" placeholder="e.g., Jane Doe" required>
+              <input type="text" class="form-control" id="contactName" name="contactName" placeholder="" required>
               <div class="invalid-feedback">Please provide your name.</div>
             </div>
             <div class="col-md-6">
-              <label for="contactEmail" class="form-label">Email Address</label>
-              <input type="email" class="form-control" id="contactEmail" name="contactEmail" placeholder="e.g., jane.doe@example.com" required>
-              <div class="invalid-feedback">Please provide a valid email.</div>
+              <label for="contactEmail" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" inputmode="numeric" placeholder="e.g., 9182417357" required pattern="\d{10}" maxlength="10">
+              <div class="invalid-feedback">Please provide a valid phone number.</div>
+            </div>
+            <div class="col-12">
+              <label for="contactEmail" class="form-label">Email Address (Optional)</label>
+              <input type="email" class="form-control" id="contactEmail" name="contactEmail" placeholder="e.g., example@gmail.com">
+              <div class="invalid-feedback">Please provide a valid email address.</div>
             </div>
             <div class="col-12">
               <label for="contactSubject" class="form-label">Subject</label>
@@ -240,28 +245,5 @@
   <a href="#" id="whatsappLink" class="whatsapp-fab" target="_blank" rel="noopener noreferrer" style="display:none;" aria-label="Chat on WhatsApp">
     <i class="bi bi-whatsapp"></i>
   </a>
-
-
-  <script>
-    (() => {
-      'use strict'
-      const forms = document.querySelectorAll('.needs-validation')
-      Array.from(forms).forEach(form => {
-        form.addEventListener('submit', event => {
-          if (!form.checkValidity()) {
-            event.preventDefault()
-            event.stopPropagation()
-          }
-          form.classList.add('was-validated')
-        }, false)
-      })
-
-      const currentYearElements = document.querySelectorAll('[data-current-year]');
-      const nextYearElements = document.querySelectorAll('[data-next-year]');
-      const currentYear = new Date().getFullYear();
-      currentYearElements.forEach(el => el.textContent = currentYear);
-      nextYearElements.forEach(el => el.textContent = currentYear + 1);
-    })();
-  </script>
 </body>
 </html>
