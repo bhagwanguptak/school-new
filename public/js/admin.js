@@ -47,6 +47,31 @@ async function initializeEditors() {
   }
 }
 
+//FavIcon
+function setDynamicFavicon(pngUrl) {
+  const favicon = document.getElementById('favicon');
+  const appleTouchIcon = document.getElementById('apple-touch-favicon');
+
+  if (favicon) {
+    favicon.href = pngUrl;
+  }
+  
+  if (appleTouchIcon) {
+    appleTouchIcon.href = pngUrl;
+  }
+}
+
+function extractSrcFromIframe(inputString) {
+  // If the input string contains '<iframe', try to extract the src.
+  if (inputString.includes('<iframe')) {
+    const match = inputString.match(/src="([^"]+)"/);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return inputString;
+}
 function generateFacilityCardInputsAdmin(facilityCardsData = []) {
     const container = getElement('facilityCardsAdminContainer');
     if (!container) return;
@@ -119,7 +144,7 @@ async function fetchSettings() {
       facilitiesGradient: { color1: '#f8f9fa', color2: '#ffffff', color3: '#000000', color4: '#000000', direction: 'to right' },
       contactGradient: { color1: '#ffffff', color2: '#e9ecef', color3: '#000000', color4: '#000000', direction: 'to right' },
       heroGradient: { color1: '#007bff', color2: '#6f42c1', color3: '#fd7e14', color4: '#00c6ff', direction: '45deg'},
-      defaultCarouselImageURL: '/uploads/placeholder-carousel.jpg',
+      defaultCarouselImageURL: '/uploads/placeholder-carousel.jpg ',
       defaultCarouselAltText: 'Our Beautiful Campus', defaultCarouselLink: '#about',
       contactFormAction: 'whatsapp', schoolContactEmail: '', adminSchoolWhatsappNumber: ''
     };
@@ -139,12 +164,13 @@ async function fetchSettings() {
         heroGradient: { ...defaults.heroGradient, ...(serverSettings.heroGradient || {}) }
     };
     
-    if (completeSettings.facilityCards.length < MAX_FACILITY_CARDS) {
+    if (completeSettings.facilityCards.length <= MAX_FACILITY_CARDS) {
         const diff = MAX_FACILITY_CARDS - completeSettings.facilityCards.length;
         for (let i = 0; i < diff; i++) {
             completeSettings.facilityCards.push({ iconClass: '', title: '', description: '' });
         }
     }
+   
     return completeSettings;
   } catch (error) {
     console.error('Error fetching settings:', error.message);
@@ -257,12 +283,10 @@ async function removeCarouselImageAdmin(id) {
 
 async function loadAdminData() {
   try {
-    // if (isAdminPage()) {
-    //   await initializeEditors();
-    // }
+  
 
     const settings = await fetchSettings();
-    if (!settings) return; // Stop if fetchSettings handled a redirect
+    if (!settings) return;
 
     const carouselImages = await fetchCarouselImages();
     applyBaseSettings(settings); 
@@ -428,13 +452,16 @@ async function saveAdminSettings() {
       return; 
   }
 
-  const facilityCards = [];
+ const facilityCards = [];
   for (let i = 0; i < MAX_FACILITY_CARDS; i++) {
       const iconClass = getElement(`facilityIcon${i}`)?.value.trim() || '';
       const title = getElement(`facilityTitle${i}`)?.value.trim() || '';
       const description = getElement(`facilityDesc${i}`)?.value.trim() || '';
-      facilityCards.push({ iconClass, title, description });
+      if (iconClass || title || description) {
+        facilityCards.push({ iconClass, title, description });
+      }
   }
+
 
   const settingsToSave = {
     schoolName: getElement('schoolName')?.value || '',
@@ -457,7 +484,7 @@ async function saveAdminSettings() {
         youtube: getElement('socialYouTube')?.value.trim() || '',
     },
     socialWhatsapp: getElement('socialWhatsapp')?.value.trim() || '',
-    contactMapEmbedURL: getElement('contactMapEmbedURL')?.value.trim() || '',
+    contactMapEmbedURL: extractSrcFromIframe(getElement('contactMapEmbedURL')?.value.trim() || ''),
     facilityCards: facilityCards,
     defaultCarouselImageURL: getElement('defaultCarouselImageURL')?.value.trim() || '',
     defaultCarouselAltText: getElement('defaultCarouselAltText')?.value.trim() || '',
@@ -591,12 +618,13 @@ function applyPublicSchoolDisplaySettings(settings) {
     const logoUrlToUse = settings.logoURL || settings.defaultLogoURL;
     getElement('logoURL').src = logoUrlToUse; getElement('logoURL').alt = `${finalSchoolName} Logo`;
     getElement('footerLogoURL').src = logoUrlToUse; getElement('footerLogoURL').alt = `${finalSchoolName} Logo`;
+    setDynamicFavicon(logoUrlToUse);
 
     getElement('aboutUsImage').src = settings.aboutUsImageURL || settings.defaultAboutImageURL;
     getElement('aboutUsImage').alt = `About ${finalSchoolName}`;
     getElement('school-location-footer').textContent=finalSchoolLocationFooter;
     
-    const academicsImageEl = getElement('academicsImage'); // This element was commented out in school.html
+    const academicsImageEl = getElement('academicsImage'); 
     if(academicsImageEl) {
       academicsImageEl.src = settings.academicsImageURL || settings.defaultAcademicsImageURL;
       academicsImageEl.alt = `Academics at ${finalSchoolName}`;
@@ -693,7 +721,7 @@ function populateCarouselPublic(images, settings) {
     carouselInner.innerHTML = ''; carouselIndicators.innerHTML = '';
 
     if (!images || images.length === 0) {
-        const defaultImageURL = settings.defaultCarouselImageURL || '/uploads/placeholder-carousel.jpg';
+        const defaultImageURL = settings.defaultCarouselImageURL || '';
         const defaultAltText = settings.defaultCarouselAltText || 'Campus Highlight';
         const defaultLink = settings.defaultCarouselLink || '#';
         const itemDiv = document.createElement('div'); itemDiv.className = 'carousel-item active';

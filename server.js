@@ -609,7 +609,7 @@ Sent from the school website.`;
       replyTo: contactEmail, // Set Reply-To to the user's email
       to: schoolContactEmailSetting, // List of receivers (school's email)
       subject: `New Contact Form: ${contactSubject}`, // Subject line
-      text: `You have a new contact form submission:\n\nName: ${contactName}\nEmail: ${contactEmail}\Phone Number: ${phoneNumber}\nSubject: ${contactSubject}\n\nMessage:\n${contactMessage}`, // Plain text body
+      text: `You have a new contact form submission:\n\nName: ${contactName}\nEmail: ${contactEmail}\nPhone Number: ${phoneNumber}\nSubject: ${contactSubject}\n\nMessage:\n${contactMessage}`, // Added missing \n
       html: `<p><strong>You have a new contact form submission:</strong></p>
              <ul>
                <li><strong>Name:</strong> ${contactName}</li>
