@@ -437,6 +437,16 @@ app.get('/api/carousel', (req, res) => {
   });
 });
 
+app.get('/api/users',checkAuth, (req, res) => {
+  db.all('SELECT * FROM users', [], (err, rows) => {
+    if (err) {
+      console.error("GET /api/users error:", err.message);
+      return res.status(500).json({ error: "Failed to retrieve users images: " + err.message });
+    }
+    res.json(rows);
+  });
+});
+
 // Field name in upload.single() MUST match the key used in FormData.append() on the client
 app.post('/api/carousel', checkAuth, upload.single('carouselImage'), multerErrorHandler, (req, res) => {
   if (!req.file) {
@@ -488,6 +498,7 @@ app.delete('/api/carousel/:id', checkAuth, (req, res) => {
           // Don't stop; still try to delete from DB.
       }
       
+      
       db.run('DELETE FROM carousel_images WHERE id = ?', [imageId], function(dbErr) { // Use function for this.changes
         if (dbErr) {
           console.error("Error deleting image from database (DB):", dbErr.message);
@@ -504,6 +515,70 @@ app.delete('/api/carousel/:id', checkAuth, (req, res) => {
     });
   });
 });
+
+//Delete user from DB
+app.delete('/api/delete-user/:id',checkAuth,(req,res)=>{
+    const userId = parseInt(req.params.id, 10);
+    db.get('SELECT id FROM users WHERE id = ?', [userId], (err, row) => {
+    if (err) {
+      console.error("Error finding user for deletion (DB):", err.message);
+      return res.status(500).json({ error: 'Database error while trying to find user.' });
+    }
+    if (!row) {
+      return res.status(404).json({ error: 'User not found in database.' });
+    }
+      db.run('DELETE FROM users WHERE id = ?', [userId], function(dbErr) { // Use function for this.changes
+          if (dbErr) {
+            console.error("Error deleting user from database (DB):", dbErr.message);
+            return res.status(500).json({ error: 'Database error while deleting user record.' });
+          }
+          if (this.changes === 0) {
+              // This could happen if the image was deleted between the SELECT and DELETE operations
+              console.warn(`DB: User ID ${userId} not found for deletion, or already deleted.`);
+              return res.status(404).json({ error: 'User not found in database for deletion (or was already deleted).' });
+          }
+          console.log(`User ID ${userId} deleted successfully (DB changes: ${this.changes}).`);
+          res.json({ message: 'User deleted successfully.' });
+        });
+    });
+
+});
+//Add user to DB
+app.post('/api/add-user/:id/:userName/:password',checkAuth,(req,res)=>{
+  const addUserId = parseInt(req.params.id,10);
+  const addUserName = req.params.userName;
+  const addpassword = req.params.password;
+ 
+ db.get("SELECT * FROM users WHERE id = ?", [addUserId], async (err, row) => {
+      if (err) return console.error("Error checking admin user:", err.message);
+      if (!row) {
+        try {
+          const addHashedPassword = await bcrypt.hash(addpassword, saltRounds);
+          db.run("INSERT INTO users (username, password) VALUES (?, ?)", 
+            [addUserName, addHashedPassword], (err) => {
+            if (err) return console.error("Error inserting default admin:", err.message);
+            console.log(`User ('${addUserName}') created. Password ('${addpassword}') is HASHED in DB.`);
+            console.log("IMPORTANT: Change the default password via a secure mechanism in a real application.");
+            return res.json({
+              message :`User with username : ${addUserName} added succesfully.`
+            })
+          });
+        } catch (hashError) {
+          console.error("Error hashing default admin password:", hashError);
+         
+        }
+      } else {
+        console.log(`Admin user ('${addUserName}') already exists.`);
+        return res.json({
+              message :`User with username : ${addUserName} already exists.`
+            })
+      }
+    });
+
+
+});
+
+
 // ----whatsapp messaging---
 // ---- CONTACT FORM SUBMISSION API ----
 app.post('/api/submit-contact', async (req, res) => {
