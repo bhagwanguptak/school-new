@@ -633,7 +633,7 @@ function applyPublicSchoolDisplaySettings(settings) {
     querySelector('.about-us-info').innerHTML = settings.aboutUsText || '<p>Info coming soon.</p>';
     querySelector('.admission-info').innerHTML = settings.admission || '<p>Details coming soon.</p>';
     querySelector('.academics-info-container .academics-dynamic-content').innerHTML = settings.academics || '<p>Curriculum details soon.</p>';
-    querySelector('.facilities-overview-text').innerHTML = settings.facilitiesText || '<p>Excellent facilities offered.</p>';
+    // querySelector('.facilities-overview-text').innerHTML = settings.facilitiesText || '<p>Excellent facilities offered.</p>';
     getElement('heroSchoolTagline').textContent = finalTagline;
 
     applySectionGradient('hero', settings.heroGradient || {});

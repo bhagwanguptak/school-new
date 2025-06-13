@@ -237,7 +237,7 @@ html[data-theme="dark"] .navbar-toggler-icon {
 
 /* Carousel Section */
 .carousel-item img {
-  max-height: 600px; 
+  max-height: fit-content; 
   object-fit: cover;
   border-radius: var(--border-radius-lg);
 }
@@ -276,6 +276,9 @@ html[data-theme="dark"] .carousel-indicators [data-bs-target] {
   border-radius: 2rem;
   margin-block: auto;
   margin-bottom: 20px;
+}
+#facilities{
+  background-image: url(../uploads/lakshyam_logo.jpg);
 }
 #schoolCarousel{
   margin-bottom: 10px;
